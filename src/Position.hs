@@ -5,8 +5,9 @@ data Direction = East
                | North 
                | South
 
-data Position = Grid Integer Integer
-     deriving (Show, Eq, Ord)
+data Position = Grid { getX :: Integer
+                     , getY :: Integer
+                     } deriving (Show, Eq, Ord)
 
 instance Semigroup Position where
    Grid x1 y1 <> Grid x2 y2 = Grid x y
@@ -16,14 +17,6 @@ instance Semigroup Position where
 instance Monoid Position where
     mempty  = Grid 0 0
     mappend = (<>)
-
-getX :: Position -> Integer
-getX pos = case pos of
-                Grid x _ -> x
-
-getY :: Position -> Integer
-getY pos = case pos of
-                Grid _ y -> y
 
 getAsPair :: Position -> (Integer, Integer)
 getAsPair pos = case pos of

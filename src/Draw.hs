@@ -9,11 +9,8 @@ import Data.Matrix hiding (map)
 
 import UI.NCurses hiding (Color)
 
-drawTiles :: Colors -> Position -> Tiles -> Update ()
-drawTiles colors drawPos tiles = mapM_ drawPairs posTilePairs
-    where makePairs coord tile = (tileCoordsToPosition drawPos coord, tile)
-          posTilePairs = mapPos makePairs tiles
-          drawPairs = uncurry (drawTile colors)
+drawTiles :: Colors -> Tiles -> Update ()
+drawTiles colors tiles = mapM_ (uncurry (drawTile colors)) (assocs tiles)
 
 drawTile :: Colors -> Position -> Tile -> Update ()
 drawTile colors pos tile = case tile of
@@ -27,18 +24,11 @@ drawTile colors pos tile = case tile of
     where x = getX pos
           y = getY pos
 
-class (Show a) => Drawable a where
-    getDrawPosition :: a -> Position
+class Drawable a where
     getTiles :: a -> Tiles 
 
 draw :: (Drawable a) => Colors -> a -> Update ()
-draw colors d = drawTiles colors drawPosition tiles
-    where drawPosition = getDrawPosition d
-          tiles = getTiles d
+draw colors drawable = drawTiles colors $ getTiles drawable
 
 layer :: (Drawable a, Drawable b) => a -> b -> Tiles
-layer a b = layerTiles (aTiles, aPos) (bTiles, bPos)
-    where aTiles = getTiles a
-          aPos   = getDrawPosition a
-          bTiles = getTiles b
-          bPos   = getDrawPosition b
+layer a b = layerTiles (getTiles a) (getTiles b)

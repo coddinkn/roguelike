@@ -4,33 +4,26 @@ import Action
 import Player
 import Draw
 import Color
-import Tile hiding (getTile)
+import Tile
 import Position
 
 import Prelude   hiding (lookup)
 import Data.List hiding (lookup)
-import Data.IntMap ( IntMap
-                   , lookup
-                   , toAscList
-                   , fromList )
+import Data.Map 
 
-data Level = Level (IntMap (IntMap Char))
+data Level = Level { tiles :: Tiles }
 
 makeLevel :: [String] -> Level
-makeLevel strings = Level $ fromList $ zip [0..] ys
-    where ys = map (fromList . zip [0..]) strings
-
-instance Show Level where 
-    show (Level ys) = concat $ intersperse "\n" strings
-           where strings = map (map snd) $ map toAscList xs
-                 xs      = map snd $ toAscList ys :: [IntMap Char]
-
+makeLevel strings = Level $ fromList tiles
+    where tiles = do (row, string) <- zip [0..] strings
+                     (col, char)   <- zip [0..] string
+                     return $ (Grid col row, Default char)
+                      
 instance Drawable Level where
-    getDrawPosition _ = mempty 
-    getTiles = makeTiles (White, Black) . show
+    getTiles = tiles
 
 getTile :: Level -> Integer -> Integer -> Maybe Char
-getTile (Level map) x y = lookup (fromInteger x) map >>= lookup (fromInteger y)
+getTile level x y = head . show <$> (lookup (Grid x y) $ tiles level)
 
 checkCollision :: Level -> Player -> Direction -> Bool
 checkCollision level (Player pos) dir = 
@@ -39,7 +32,7 @@ checkCollision level (Player pos) dir =
          Nothing   -> False
     where x = getX pos
           y = getY pos
-          maybeTile = getTile level (y + dy) (x + dx)
+          maybeTile = getTile level (x + dx) (y + dy)
           (dx, dy)  = case dir of
                            West  -> (-1, 0)
                            East  -> (1,  0)

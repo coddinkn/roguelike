@@ -29,11 +29,11 @@ getAction window = do
 run :: Window -> World -> Colors -> Curses ()                   
 run window world colors = do 
     updateWindow window $ do clear
-                             drawWorld colors world
+                             draw colors world
     render
     action <- getAction window
     let newWorld = updateWorld world action
-    if worldDone newWorld
+    if done newWorld
     then closeWindow window 
     else run window newWorld colors
                                               

@@ -5,9 +5,9 @@ import Draw
 import Color
 import Position
 
-data Monster = Generic Position
+import Data.Map hiding (map)
 
-type Monsters = [Monster]
+data Monster = Generic Position
 
 instance Show Monster where
     show monster = 
@@ -15,17 +15,14 @@ instance Show Monster where
              Generic _ -> "M"
 
 instance Drawable Monster where
-    getDrawPosition monster =
-        case monster of
-             Generic pos -> pos
     getTiles monster = 
         case monster of
-             Generic _ -> makeTiles (Green, Black) "M"
+             Generic pos -> fromList $ [(pos, Colored 'M' (Green, Black))]
 
 makeMonster :: (Integer, Integer) -> Monster
 makeMonster (x, y) = Generic $ Grid x y
 
-makeMonsters :: String -> String -> Monsters
+makeMonsters :: String -> String -> [Monster]
 makeMonsters xString yString = map makeMonster $ zip xs ys
     where xs = map read $ words xString
           ys = map read $ words yString 

@@ -10,7 +10,7 @@ import Data.Matrix hiding (map)
 import UI.NCurses hiding (Color)
 
 drawTiles :: Colors -> Tiles -> Update ()
-drawTiles colors tiles = mapM_ (uncurry (drawTile colors)) (assocs tiles)
+drawTiles colors (Tiles tiles) = mapM_ (uncurry (drawTile colors)) (assocs tiles)
 
 drawTile :: Colors -> Position -> Tile -> Update ()
 drawTile colors pos tile = case tile of
@@ -31,4 +31,4 @@ draw :: (Drawable a) => Colors -> a -> Update ()
 draw colors drawable = drawTiles colors $ getTiles drawable
 
 layer :: (Drawable a, Drawable b) => a -> b -> Tiles
-layer a b = layerTiles (getTiles a) (getTiles b)
+layer a b = getTiles a <> getTiles b

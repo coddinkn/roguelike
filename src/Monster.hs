@@ -17,12 +17,12 @@ instance Show Monster where
 instance Drawable Monster where
     getTiles monster = 
         case monster of
-             Generic pos -> fromList $ [(pos, Colored 'M' (Green, Black))]
+             Generic pos -> Tiles . fromList $ [(pos, Colored 'M' (Green, Black))]
 
 makeMonster :: (Integer, Integer) -> Monster
-makeMonster (x, y) = Generic $ Grid x y
+makeMonster = Generic . uncurry Grid
 
 makeMonsters :: String -> String -> [Monster]
-makeMonsters xString yString = map makeMonster $ zip xs ys
-    where xs = map read $ words xString
-          ys = map read $ words yString 
+makeMonsters xString yString = makeMonster <$> zip xs ys
+    where xs = read <$> words xString
+          ys = read <$> words yString

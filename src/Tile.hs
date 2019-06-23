@@ -19,7 +19,13 @@ emptyTile :: Tile -> Bool
 emptyTile Empty = True
 emptyTile _     = False 
 
-type Tiles = Map Position Tile
+newtype Tiles = Tiles (Map Position Tile)
 
-layerTiles :: Tiles -> Tiles -> Tiles
-layerTiles = union
+instance Show Tiles where
+    show (Tiles tiles) = head . show . snd <$> toList tiles
+
+instance Semigroup Tiles where
+    Tiles a <> Tiles b = Tiles $ union a b
+
+instance Monoid Tiles where
+    mempty = Tiles empty

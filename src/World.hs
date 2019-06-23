@@ -14,7 +14,7 @@ data World = World { player :: Player
                    , level :: Level
                    , monsters :: [Monster]
                    , done :: Bool
-                   }
+                   } deriving Show
 
 updateWorld :: World -> Action -> World
 updateWorld (World player level monsters done) action = case action of
@@ -32,6 +32,7 @@ loadWorld contents = World player level monsters False
           level        = makeLevel $ drop 4 ls
 
 instance Drawable World where
-    getTiles (World player level monsters _) = let monsterTiles = foldr1 layerTiles $ getTiles <$> monsters
-                                                   entityTiles = layerTiles (getTiles player) monsterTiles
-                                               in layerTiles entityTiles $ getTiles level 
+    getTiles (World player level monsters _) = let monsterTiles = getTiles <$> monsters
+                                                   playerTiles  = [getTiles player]
+                                                   levelTiles   = [getTiles level]
+                                               in mconcat $ playerTiles ++ monsterTiles ++ levelTiles

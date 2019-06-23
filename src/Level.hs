@@ -11,10 +11,10 @@ import Prelude   hiding (lookup)
 import Data.List hiding (lookup)
 import Data.Map 
 
-data Level = Level { tiles :: Tiles }
+data Level = Level { tiles :: Tiles } deriving Show
 
 makeLevel :: [String] -> Level
-makeLevel strings = Level $ fromList tiles
+makeLevel strings = Level . Tiles $ fromList tiles
     where tiles = do (row, string) <- zip [0..] strings
                      (col, char)   <- zip [0..] string
                      return $ (Grid col row, Default char)
@@ -23,7 +23,7 @@ instance Drawable Level where
     getTiles = tiles
 
 getTile :: Level -> Integer -> Integer -> Maybe Char
-getTile level x y = head . show <$> (lookup (Grid x y) $ tiles level)
+getTile (Level (Tiles tiles)) x y = head . show <$> (lookup (Grid x y) $ tiles)
 
 checkCollision :: Level -> Player -> Direction -> Bool
 checkCollision level (Player pos) dir = 

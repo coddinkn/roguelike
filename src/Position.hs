@@ -16,7 +16,6 @@ instance Semigroup Position where
 
 instance Monoid Position where
     mempty  = Grid 0 0
-    mappend = (<>)
 
 getAsPair :: Position -> (Integer, Integer)
 getAsPair pos = case pos of

@@ -26,11 +26,12 @@ getTile :: Level -> Integer -> Integer -> Maybe Char
 getTile (Level (Tiles tiles)) x y = head . show <$> (lookup (Grid x y) $ tiles)
 
 checkCollision :: Level -> Player -> Direction -> Bool
-checkCollision level (Player pos) dir = 
+checkCollision level player dir =
     case maybeTile of
          Just tile -> tile /= '.'
          Nothing   -> False
-    where x = getX pos
+    where pos = position player
+          x = getX pos
           y = getY pos
           maybeTile = getTile level (x + dx) (y + dy)
           (dx, dy)  = case dir of

@@ -21,7 +21,7 @@ executable roguelike
                      , ncurses
                      , containers
                      , matrix
-                     , lens
+                     , random
   other-modules:       Action
                      , Level
                      , Monster

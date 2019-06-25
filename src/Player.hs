@@ -10,14 +10,19 @@ import Data.Map
 
 import UI.NCurses
 
-data Player = Player Position
+data Player = Player { position :: Position
+                     , stats    :: Stats
+                     }
 
 instance Show Player where
     show player = "@"
 
 instance Drawable Player where
-    getTiles (Player pos) = Tiles . fromList $ [(pos, Colored '@' (Yellow, Black))]
+    getTiles (Player pos _) = Tiles . fromList $ [(pos, Colored '@' (Yellow, Black))]
 
 instance Entity Player where
-    getPosition (Player pos) = pos 
-    move (Player pos) = Player . changePosition pos
+    getPosition = position
+    move player dir = player { position = newPos }
+         where pos = position player
+               newPos = changePosition pos dir
+    getStats = stats

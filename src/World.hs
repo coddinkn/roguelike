@@ -16,19 +16,27 @@ data World = World { player :: Player
                    , done :: Bool
                    } deriving Show
 
-updateWorld :: World -> Action -> World
-updateWorld (World player level monsters done) action = case action of
+updateWorld :: World -> Action -> [Integer] -> (World, [Integer])
+updateWorld world action random = (monsterTurn $ playerTurn world action, random)
+
+playerTurn :: World -> Action -> World
+playerTurn (World player level monsters done) action = case action of
     Move dir -> if checkCollision level player dir
                 then (World player level monsters False) 
                 else (World (move player dir) level monsters False)
     Quit     -> World player level monsters True
 
+monsterTurn :: World -> World
+monsterTurn = id
+
 loadWorld :: String -> World
 loadWorld contents = World player level monsters False
     where ls           = lines contents 
           x:y:xs:ys:_  = ls
-          player       = Player $ Grid (read x :: Integer) (read y :: Integer)
-          monsters     = makeMonsters xs ys 
+          playerPos    = Grid (read x :: Integer) (read y :: Integer)
+          playerStats  = Stats 20 20 12 12 12 12
+          player       = Player playerPos playerStats
+          monsters     = makeMonsters xs ys
           level        = makeLevel $ drop 4 ls
 
 instance Drawable World where

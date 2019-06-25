@@ -9,13 +9,16 @@ data Position = Grid { getX :: Integer
                      , getY :: Integer
                      } deriving (Show, Eq, Ord)
 
-instance Semigroup Position where
-   Grid x1 y1 <> Grid x2 y2 = Grid x y
-      where x = x1 + x2
-            y = y1 + y2 
+liftGrid :: (Integer -> Integer -> Integer) -> Position -> Position -> Position
+liftGrid f (Grid x1 y1) (Grid x2 y2) = Grid (f x1 x2) (f y1 y2)
 
-instance Monoid Position where
-    mempty  = Grid 0 0
+instance Num Position where
+    (+) = liftGrid (+)
+    (-) = liftGrid (-)
+    (*) = liftGrid (*)
+    abs (Grid x y) = Grid (abs x) (abs y)
+    signum (Grid x y) = Grid (signum x) (signum y)
+    fromInteger i = Grid (fromInteger i) (fromInteger i)
 
 getAsPair :: Position -> (Integer, Integer)
 getAsPair pos = case pos of
@@ -29,5 +32,5 @@ dirToUnitPosition dir = uncurry Grid $ case dir of
     South -> (0,  1)
 
 changePosition :: Position -> Direction -> Position
-changePosition pos dir = pos <> change
+changePosition pos dir = pos + change
     where change = dirToUnitPosition dir

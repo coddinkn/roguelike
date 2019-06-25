@@ -6,6 +6,8 @@ import Position
 
 import UI.NCurses
 
+import System.Random
+
 eventToInput :: Event -> Maybe Input
 eventToInput event = case event of
     EventCharacter c -> Just $ CharKey c
@@ -26,21 +28,22 @@ getAction window = do
          Just action -> return action
          _           -> getAction window
     
-run :: Window -> World -> Colors -> Curses ()                   
-run window world colors = do 
+run :: Window -> World -> Colors -> [Integer] -> Curses ()
+run window world colors random = do
     updateWindow window $ do clear
                              draw colors world
     render
     action <- getAction window
-    let newWorld = updateWorld world action
+    let (newWorld, newRandom) = updateWorld world action random
     if done newWorld
     then closeWindow window 
-    else run window newWorld colors
+    else run window newWorld colors newRandom
                                               
 main = do world <- loadWorld <$> readFile "world.txt"  
+          random <- randoms <$> getStdGen
           runCurses $ do setEcho False
                          setCBreak True
                          setCursorMode CursorInvisible
                          colors <- setUpColorIDs
                          window <- defaultWindow
-                         run window world colors
+                         run window world colors random

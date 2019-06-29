@@ -4,6 +4,7 @@ import Action
 import Player
 import Draw
 import Color
+import Entity
 import Tile
 import Position
 
@@ -25,12 +26,12 @@ instance Drawable Level where
 getTile :: Level -> Integer -> Integer -> Maybe Char
 getTile (Level (Tiles tiles)) x y = head . show <$> (lookup (Grid x y) $ tiles)
 
-checkCollision :: Level -> Player -> Direction -> Bool
-checkCollision level player dir =
+checkCollision :: Entity a => Level -> a -> Direction -> Bool
+checkCollision level entity dir =
     case maybeTile of
          Just tile -> tile /= '.'
          Nothing   -> False
-    where pos = position player
+    where pos = getPosition entity
           x = getX pos
           y = getY pos
           maybeTile = getTile level (x + dx) (y + dy)

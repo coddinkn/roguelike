@@ -33,7 +33,7 @@ hurt :: Entity a => a -> Integer -> a
 hurt entity damage = updateStats entity $ stats { currentHealth = newHealth }
     where stats = getStats entity
           oldHealth = currentHealth stats
-          newHealth = currentHealth - damage
+          newHealth = oldHealth - damage
 
 fight :: (Entity a, Entity b) => [Integer] -> a -> b -> (a, b, [Integer])
 fight (r1:r2:r3:r4:newRandom) attacker defender = if defenderEvasion > attackerAccuracy

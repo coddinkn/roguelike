@@ -31,13 +31,12 @@ monsterTurn = id
 
 loadWorld :: String -> World
 loadWorld contents = World player level monsters False
-    where ls           = lines contents 
-          x:y:xs:ys:_  = ls
-          playerPos    = Grid (read x :: Integer) (read y :: Integer)
-          playerStats  = Stats 20 20 12 12 12 12
-          player       = Player playerPos playerStats
-          monsters     = makeMonsters xs ys
-          level        = makeLevel $ drop 4 ls
+    where x:y:xs:ys:l = lines contents
+          playerPos   = Grid (read x :: Integer) (read y :: Integer)
+          playerStats = Stats 20 20 12 12 12 12
+          player      = Player playerPos playerStats
+          monsters    = makeMonsters xs ys
+          level       = makeLevel l
 
 instance Drawable World where
     getTiles (World player level monsters _) = let monsterTiles = getTiles <$> monsters

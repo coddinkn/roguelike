@@ -17,6 +17,7 @@ instance Entity Monster where
     getStats = monsterStats
     move (Generic pos stats) dir = Generic newPos stats
         where newPos = changePosition pos dir
+    updateStats monster stats = monster { monsterStats = stats }
 
 instance Show Monster where
     show monster = 

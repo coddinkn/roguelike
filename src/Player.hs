@@ -26,4 +26,4 @@ instance Entity Player where
          where pos = position player
                newPos = changePosition pos dir
     getStats = stats
-    updateStats player s= player { stats = s }
+    updateStats player s = player { stats = s }

@@ -30,8 +30,7 @@ getAction window = do
     
 run :: Window -> World -> Colors -> [Integer] -> Curses ()
 run window world colors random = do
-    updateWindow window $ do clear
-                             draw colors world
+    updateWindow window $ draw colors world
     render
     action <- getAction window
     let (newWorld, newRandom) = updateWorld world action random

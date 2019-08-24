@@ -5,7 +5,6 @@ import Tile
 import Color
 
 import Data.Map hiding (map)
-import Data.Matrix hiding (map)
 
 import UI.NCurses hiding (Color)
 

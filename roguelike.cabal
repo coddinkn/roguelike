@@ -20,15 +20,17 @@ executable roguelike
   build-depends:       base >= 4.7 && < 5
                      , ncurses
                      , containers
-                     , matrix
                      , random
+                     , MonadRandom
   other-modules:       Action
                      , Level
                      , Monster
                      , Color
                      , Tile
                      , Draw
+                     , Game
                      , Player
                      , Entity
                      , Position
                      , World
+                     , Input

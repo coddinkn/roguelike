@@ -1,6 +1,6 @@
 module World where
 
-import Action
+import Entity
 import Player
 import Draw
 import Color
@@ -8,29 +8,16 @@ import Tile
 import Position
 import Level
 import Monster
-import Entity
+
+import Data.List
 
 data World = World { player :: Player
                    , level :: Level
                    , monsters :: [Monster]
-                   , done :: Bool
                    } deriving Show
 
-updateWorld :: World -> Action -> [Integer] -> (World, [Integer])
-updateWorld world action random = (monsterTurn $ playerTurn world action, random)
-
-playerTurn :: World -> Action -> World
-playerTurn (World player level monsters done) action = case action of
-    Move dir -> if checkCollision level player dir
-                then (World player level monsters False) 
-                else (World (move player dir) level monsters False)
-    Quit     -> World player level monsters True
-
-monsterTurn :: World -> World
-monsterTurn = id
-
 loadWorld :: String -> World
-loadWorld contents = World player level monsters False
+loadWorld contents = World player level monsters
     where x:y:xs:ys:l = lines contents
           playerPos   = Grid (read x :: Integer) (read y :: Integer)
           playerStats = Stats 20 20 12 12 12 12
@@ -38,8 +25,16 @@ loadWorld contents = World player level monsters False
           monsters    = makeMonsters xs ys
           level       = makeLevel l
 
+checkPlayerLevelCollision :: World -> Direction -> Bool
+checkPlayerLevelCollision (World player level _) = checkCollision level player
+
+checkPlayerMonsterCollision :: World -> Direction -> Maybe Monster
+checkPlayerMonsterCollision (World player _ monsters) dir = find samePosition monsters
+    where samePosition monster = getPosition monster == (getPosition player + dirToUnitPosition dir)
+
 instance Drawable World where
-    getTiles (World player level monsters _) = let monsterTiles = getTiles <$> monsters
-                                                   playerTiles  = [getTiles player]
-                                                   levelTiles   = [getTiles level]
-                                               in mconcat $ playerTiles ++ monsterTiles ++ levelTiles
+    getTiles (World player level monsters) =
+        let monsterTiles = getTiles <$> monsters
+            playerTiles  = [getTiles player]
+            levelTiles   = [getTiles level]
+        in mconcat $ playerTiles ++ monsterTiles ++ levelTiles

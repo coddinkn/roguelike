@@ -1,6 +1,5 @@
 module Level where
 
-import Action
 import Player
 import Draw
 import Color

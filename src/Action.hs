@@ -1,32 +1,35 @@
 module Action where
 
+import Input
+import Player
+import Monster
+import World
 import Position
+import Entity
 
-data Input = CharKey    Char
-           | SpecialKey Special
-
-data Special = LeftArrow
-             | RightArrow
-             | UpArrow
-             | DownArrow
+import System.Random
+import Control.Monad.Random
+import Data.Maybe
 
 data Action = Move Direction
-            | Quit
+            | Attack Monster
 
-inputToAction :: Input -> Maybe Action
-inputToAction input = 
-    case input of
-         CharKey char | char `elem` "hjklq" ->
-            Just $ case char of
-                        'h' -> Move West
-                        'j' -> Move South
-                        'k' -> Move North
-                        'l' -> Move East
-                        'q' -> Quit
-         SpecialKey key ->
-            Just $ Move $ case key of
-                               LeftArrow  -> West
-                               RightArrow -> East
-                               UpArrow    -> North
-                               DownArrow  -> South
-         _ -> Nothing
+updateWorld :: World -> Action -> Rand StdGen World
+updateWorld world action = monsterTurn <$> playerTurn world action
+
+evaluateInput :: World -> Input -> Maybe Action
+evaluateInput world input = case input of
+    Try dir | checkPlayerLevelCollision world dir -> Nothing
+            | not $ isNothing target -> Attack <$> target
+            | otherwise              -> Just $ Move dir
+            where target = checkPlayerMonsterCollision world dir
+    _ -> Nothing
+
+monsterTurn :: World -> World
+monsterTurn = id
+
+playerTurn :: World -> Action -> Rand StdGen World
+playerTurn world action = return $
+    case action of
+         Move dir -> world { player = move (player world) dir }
+         _ -> world

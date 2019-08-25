@@ -8,6 +8,9 @@ import Data.Map hiding (map)
 
 import UI.NCurses hiding (Color)
 
+class Drawable a where
+    getTiles :: a -> Tiles
+
 fillScreen :: Colors -> (Color, Color) -> Update ()
 fillScreen colors color =
     do (maxY, maxX) <- windowSize
@@ -15,7 +18,7 @@ fillScreen colors color =
        where fillColor = findColor colors color
              fillGlyph = Glyph ' ' [AttributeColor fillColor]
              fillSpace maxX y = do moveCursor y 0
-                                   flip drawLineH maxX $ Just $ fillGlyph
+                                   flip drawLineH maxX . Just $ fillGlyph
 
 drawTiles :: Colors -> Tiles -> Update ()
 drawTiles colors (Tiles tiles) = mapM_ (uncurry (drawTile colors)) (assocs tiles)
@@ -31,9 +34,6 @@ drawTile colors pos tile = case tile of
             drawString $ show tile
     where x = getX pos
           y = getY pos
-
-class Drawable a where
-    getTiles :: a -> Tiles 
 
 draw :: (Drawable a) => Colors -> a -> Update ()
 draw colors drawable = drawTiles colors $ getTiles drawable

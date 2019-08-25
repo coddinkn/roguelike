@@ -6,6 +6,7 @@ import UI.NCurses
 
 data Input = Quit
            | Try Direction
+           | ScrollLog
 
 getInput :: Window -> Curses Input
 getInput window = do
@@ -34,5 +35,6 @@ charToInput char = case char of
     'j' -> Just $ Try South
     'k' -> Just $ Try North
     'l' -> Just $ Try East
+    ' ' -> Just $ ScrollLog
     'q' -> Just Quit 
     _   -> Nothing

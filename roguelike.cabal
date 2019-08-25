@@ -3,12 +3,12 @@ version:             0.1.0.0
 -- synopsis:
 -- description:
 homepage:            https://github.com/githubuser/roguelike#readme
-license:             BSD3
+license:             MIT
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2018 Author name here
-category:            Web
+author:              Killian Coddington
+-- maintainer:          example@example.com
+copyright:           2018 Killian Coddington
+category:            Games
 build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  README.md

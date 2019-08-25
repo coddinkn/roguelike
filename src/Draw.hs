@@ -8,6 +8,15 @@ import Data.Map hiding (map)
 
 import UI.NCurses hiding (Color)
 
+fillScreen :: Colors -> (Color, Color) -> Update ()
+fillScreen colors color =
+    do (maxY, maxX) <- windowSize
+       mapM_ (fillSpace maxX) $ [0 .. (maxY - 1)]
+       where fillColor = findColor colors color
+             fillGlyph = Glyph ' ' [AttributeColor fillColor]
+             fillSpace maxX y = do moveCursor y 0
+                                   flip drawLineH maxX $ Just $ fillGlyph
+
 drawTiles :: Colors -> Tiles -> Update ()
 drawTiles colors (Tiles tiles) = mapM_ (uncurry (drawTile colors)) (assocs tiles)
 
@@ -17,7 +26,7 @@ drawTile colors pos tile = case tile of
                               moveCursor y x
                               drawString $ show tile
                               setColor defaultColorID
-        where color = findWithDefault defaultColorID drawColor colors
+        where color = findColor colors drawColor
     _ -> do moveCursor y x
             drawString $ show tile
     where x = getX pos

@@ -17,7 +17,7 @@ makeLevel :: [String] -> Level
 makeLevel strings = Level . Tiles $ fromList tiles
     where tiles = do (row, string) <- zip [0..] strings
                      (col, char)   <- zip [0..] string
-                     return $ (Grid col row, Default char)
+                     return $ (Grid col row, Colored char (White, Black))
                       
 instance Drawable Level where
     getTiles = tiles

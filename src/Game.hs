@@ -23,6 +23,8 @@ initCurses = do setEcho False
                 setCursorMode CursorInvisible
                 window <- defaultWindow
                 colors <- setUpColorIDs
+                updateWindow window $ fillScreen colors (White, Black)
+                render
                 return (window, colors) 
 
 create :: World -> IO Game

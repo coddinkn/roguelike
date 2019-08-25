@@ -39,3 +39,6 @@ setUpColorIDs = do
     let pairsWithIds = zip colorPairs [1 ..]
     colorIDs <- mapM makeColorID pairsWithIds
     return $ fromList $ zip colorPairs colorIDs
+
+findColor :: Colors -> (Color, Color) -> ColorID
+findColor colors color = findWithDefault defaultColorID color colors

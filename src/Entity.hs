@@ -37,6 +37,10 @@ accuracyRoll = roll accuracy (-1, 6)
 defenseRoll :: Entity a => a -> Rand StdGen Integer
 defenseRoll = roll defense (-2, 1)
 
+alive :: Entity a => a -> Bool
+alive a = health > 0
+    where health = currentHealth $ getStats a
+
 hurt :: Entity a => a -> Integer -> a
 hurt entity damage = updateStats entity $ stats { currentHealth = newHealth }
     where stats = getStats entity
@@ -55,3 +59,8 @@ fight attacker defender =
        return $ if defenderEvasion > attackerAccuracy
                     then (attacker, defender)
                     else (attacker, hurt defender damage)
+
+samePosition :: (Entity a, Entity b) => a -> b -> Bool
+samePosition a b = aPosition == bPosition
+    where aPosition = getPosition a
+          bPosition = getPosition b

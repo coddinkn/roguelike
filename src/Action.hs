@@ -26,10 +26,12 @@ evaluateInput world input = case input of
     _ -> Nothing
 
 monsterTurn :: World -> World
-monsterTurn = id
+monsterTurn world = let nextMonsters = filter alive $ monsters world
+                    in world { monsters = nextMonsters }
 
 playerTurn :: World -> Action -> Rand StdGen World
-playerTurn world action = return $
-    case action of
-         Move dir -> world { player = move (player world) dir }
-         _ -> world
+playerTurn world action = case action of
+    Move dir -> return $ world { player = move (player world) dir }
+    Attack monster -> do (nextPlayer, nextMonster) <- fight (player world) monster
+                         let nextMonsters = nextMonster:(filter (not . samePosition monster) (monsters world))
+                         return $ world { player = nextPlayer, monsters = nextMonsters }

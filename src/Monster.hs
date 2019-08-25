@@ -16,7 +16,7 @@ instance Entity Monster where
     getPosition = monsterPosition
     getStats = monsterStats
     move (Generic pos stats) dir = Generic newPos stats
-        where newPos = changePosition pos dir
+                                   where newPos = changePosition pos dir
     updateStats monster stats = monster { monsterStats = stats }
 
 instance Show Monster where
@@ -31,7 +31,7 @@ instance Drawable Monster where
 
 makeMonster :: (Integer, Integer) -> Monster
 makeMonster = flip Generic stats . uncurry Grid
-                where stats = Stats 10 10 10 10 10 10
+              where stats = Stats 10 10 10 10 10 10
 
 makeMonsters :: String -> String -> [Monster]
 makeMonsters xString yString = makeMonster <$> zip xs ys

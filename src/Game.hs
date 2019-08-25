@@ -38,7 +38,7 @@ loop (Game world window colors rng) =
        case input of
             Quit -> closeWindow window
             _    -> let (nextWorld, nextRng) = maybe (world, rng) 
-                                                     ((flip runRand) rng . updateWorld world)
+                                                     (flip runRand rng . updateWorld world)
                                                      maybeAction
                     in loop $ Game nextWorld window colors nextRng
                     where maybeAction = evaluateInput world input

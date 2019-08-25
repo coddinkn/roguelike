@@ -3,7 +3,10 @@ module Entity where
 import Position
 import Draw
 
-class (Drawable a) => Entity a where
+import System.Random
+import Control.Monad.Random
+
+class Drawable a => Entity a where
     getPosition :: a -> Position
     getStats :: a -> Stats
     move :: a -> Direction -> a
@@ -17,17 +20,22 @@ data Stats = Stats { currentHealth :: Integer
                    , evasion       :: Integer
                    }
 
-roll :: (Integer, Integer) -> Integer -> Integer
-roll (low, high) random = (random `mod` n) + low
-    where n = (high - low) + 1
+roll :: Entity a => (Stats -> Integer) -> (Integer, Integer) -> a -> Rand StdGen Integer
+roll stat range entity = do rollValue <- getRandomR range
+                            let entityStat = stat $ getStats entity
+                            return $ rollValue + entityStat
 
-statRoll :: (Entity a) => a -> (Stats -> Integer) -> (Integer, Integer) -> Integer -> Integer
-statRoll entity stat range = (+) (stat . getStats $ entity) . roll range
+evasionRoll :: Entity a => a -> Rand StdGen Integer
+evasionRoll = roll evasion (-4, 1)
 
-evasionRoll  entity = statRoll entity evasion  (-4, 1)
-attackRoll   entity = statRoll entity attack   (-1, 2)
-accuracyRoll entity = statRoll entity accuracy (-1, 6)
-defenseRoll  entity = statRoll entity defense  (-2, 1)
+attackRoll :: Entity a => a -> Rand StdGen Integer
+attackRoll = roll attack (-1, 2)
+
+accuracyRoll :: Entity a => a -> Rand StdGen Integer
+accuracyRoll = roll accuracy (-1, 6)
+
+defenseRoll :: Entity a => a -> Rand StdGen Integer
+defenseRoll = roll defense (-2, 1)
 
 hurt :: Entity a => a -> Integer -> a
 hurt entity damage = updateStats entity $ stats { currentHealth = newHealth }
@@ -35,14 +43,15 @@ hurt entity damage = updateStats entity $ stats { currentHealth = newHealth }
           oldHealth = currentHealth stats
           newHealth = oldHealth - damage
 
-fight :: (Entity a, Entity b) => [Integer] -> a -> b -> (a, b, [Integer])
-fight (r1:r2:r3:r4:newRandom) attacker defender = if defenderEvasion > attackerAccuracy
-                                          then (attacker, defender, newRandom)
-                                          else (attacker, hurt defender damage, newRandom)
-    where attackerAccuracy = accuracyRoll attacker r1
-          attackerAttack   = attackRoll   attacker r2
-          defenderEvasion  = evasionRoll  defender r3
-          defenderDefense  = defenseRoll  defender r4
-          damage = if attackerAttack > defenderDefense
-                   then attackerAttack - defenderDefense
-                   else 0
+fight :: (Entity a, Entity b) => a -> b -> Rand StdGen (a, b)
+fight attacker defender =
+    do attackerAccuracy <- accuracyRoll attacker
+       attackerAttack   <- attackRoll   attacker
+       defenderEvasion  <- evasionRoll  defender
+       defenderDefense  <- defenseRoll  defender
+       let damage = if attackerAttack > defenderDefense
+                    then attackerAttack - defenderDefense
+                    else 0
+       return $ if defenderEvasion > attackerAccuracy
+                    then (attacker, defender)
+                    else (attacker, hurt defender damage)

@@ -14,7 +14,6 @@ import Data.Maybe
 data Game = Game { world  :: World
                  , window :: Window
                  , colors :: Colors
-                 , rng    :: StdGen
                  }
 
 initCurses :: Curses (Window, Colors)
@@ -28,22 +27,21 @@ initCurses = do setEcho False
                 return (window, colors) 
 
 create :: World -> IO Game
-create world = do rng <- getStdGen
-                  (window, colors) <- runCurses initCurses
-                  return $ Game world window colors rng
+create world = do (window, colors) <- runCurses initCurses
+                  return $ Game world window colors
 
 loop :: Game -> Curses ()
-loop (Game world window colors rng) = 
+loop (Game world window colors) =
     do updateWindow window $ draw colors world
        render
        input <- getInput window
        case input of
             Quit -> closeWindow window
-            _    -> let (nextWorld, nextRng) = maybe (world, rng) 
-                                                     (flip runRand rng . updateWorld world)
-                                                     maybeAction
-                    in loop $ Game nextWorld window colors nextRng
-                    where maybeAction = evaluateInput world input
+            _    -> do nextWorld <- maybe (return world)
+                                          (liftIO . evalRandIO . updateWorld world)
+                                          maybeAction
+                       loop $ Game nextWorld window colors
+                       where maybeAction = evaluateInput world input
 
 play :: Game -> IO ()
 play game = runCurses $ loop game

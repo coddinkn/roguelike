@@ -47,19 +47,6 @@ hurt entity damage = updateStats entity $ stats { currentHealth = newHealth }
           oldHealth = currentHealth stats
           newHealth = oldHealth - damage
 
-fight :: (Entity a, Entity b) => a -> b -> Rand StdGen (a, b)
-fight attacker defender =
-    do attackerAccuracy <- accuracyRoll attacker
-       attackerAttack   <- attackRoll   attacker
-       defenderEvasion  <- evasionRoll  defender
-       defenderDefense  <- defenseRoll  defender
-       let damage = if attackerAttack > defenderDefense
-                    then attackerAttack - defenderDefense
-                    else 0
-       return $ if defenderEvasion > attackerAccuracy
-                    then (attacker, defender)
-                    else (attacker, hurt defender damage)
-
 samePosition :: (Entity a, Entity b) => a -> b -> Bool
 samePosition a b = aPosition == bPosition
     where aPosition = getPosition a

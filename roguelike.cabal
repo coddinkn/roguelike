@@ -23,6 +23,7 @@ executable roguelike
                      , random
                      , MonadRandom
                      , split
+                     , mtl
   other-modules:       Action
                      , Level
                      , Monster
@@ -36,3 +37,4 @@ executable roguelike
                      , World
                      , Input
                      , Log
+                     , Roguelike

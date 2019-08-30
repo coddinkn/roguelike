@@ -1,5 +1,6 @@
 module Game where
 
+import Roguelike
 import Action
 import World
 import Color
@@ -9,6 +10,7 @@ import Log
 
 import System.Random
 import Control.Monad.Random
+import Control.Monad.Writer
 import UI.NCurses
 import Data.Maybe
 
@@ -43,10 +45,10 @@ loop (Game world window colors log) =
        case input of
             Quit -> closeWindow window
             ScrollLog -> loop $ Game world window colors $ scroll newLog 1
-            _    -> do nextWorld <- maybe (return world)
-                                          (liftIO . evalRandIO . updateWorld world)
-                                          maybeAction
-                       loop $ Game nextWorld window colors $ top newLog
+            _    -> do (nextWorld, messages) <- maybe (return (world, []))
+                                                (runRoguelike . updateWorld world)
+                                                maybeAction
+                       loop $ Game nextWorld window colors . top $ addMessages newLog messages
                        where maybeAction = evaluateInput world input
 
 play :: Game -> IO ()

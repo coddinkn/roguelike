@@ -1,18 +1,23 @@
 module Log where
 
 import Color
+import Roguelike
 
 import Prelude hiding (lines)
-import UI.NCurses
+import Control.Monad.Writer
 import Data.List hiding (lines)
 import Data.List.Split
 import Data.Maybe
+import UI.NCurses
 
 data Log = Log { lines        :: [String]
                , currentLine  :: Maybe Integer
                , firstNewLine :: Maybe Integer
                , width        :: Int
                }
+
+logMessage :: String -> Roguelike ()
+logMessage = tell . pure
 
 emptyLog :: Int -> Log
 emptyLog = Log [] Nothing Nothing
@@ -36,7 +41,9 @@ top :: Log -> Log
 top log = log { currentLine = firstNewLine log } 
 
 addLines :: Log -> [String] -> Log
-addLines log newLines = log { lines = newLines ++ oldLines, currentLine = nextLine, firstNewLine = nextNewLine }
+addLines log newLines = if null newLines
+                        then log
+                        else log { lines = newLines ++ oldLines, currentLine = nextLine, firstNewLine = nextNewLine }
                         where oldLines = lines log 
                               newLinesLength = toInteger $ length newLines
                               nextLine = Just $ fromMaybe (newLinesLength - 1) $ currentLine log

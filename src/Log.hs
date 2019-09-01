@@ -4,7 +4,6 @@ import Color
 import Roguelike
 
 import Prelude hiding (lines)
-import Control.Monad.Writer
 import Data.List hiding (lines)
 import Data.List.Split
 import Data.Maybe
@@ -15,9 +14,6 @@ data Log = Log { lines        :: [String]
                , firstNewLine :: Maybe Integer
                , width        :: Int
                }
-
-logMessage :: String -> Roguelike ()
-logMessage = tell . pure
 
 emptyLog :: Int -> Log
 emptyLog = Log [] Nothing Nothing

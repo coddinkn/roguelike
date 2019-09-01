@@ -16,10 +16,6 @@ import Data.Maybe
 data Action = Move Direction
             | Attack Monster
 
-updateWorld :: World -> Action -> Roguelike World
-updateWorld world action = do world1 <- playerTurn world action
-                              monsterTurn world1
-
 evaluateInput :: World -> Input -> Maybe Action
 evaluateInput world input = case input of
     Try dir | checkPlayerLevelCollision world dir -> Nothing
@@ -28,28 +24,47 @@ evaluateInput world input = case input of
             where target = checkPlayerMonsterCollision world dir
     _ -> Nothing
 
-monsterTurn :: World -> Roguelike World
-monsterTurn world = let nextMonsters = filter alive $ monsters world
-                    in return $ world { monsters = nextMonsters }
+updateWorld :: Action -> Roguelike ()
+updateWorld action = do playerTurn action
+                        monsterTurn
 
-playerTurn :: World -> Action -> Roguelike World
-playerTurn world action = case action of
-    Move dir -> return $ world { player = move (player world) dir }
-    Attack monster -> do (nextPlayer, nextMonster) <- fight (player world) monster
+playerTurn :: Action -> Roguelike ()
+playerTurn action = case action of
+    Move dir -> do world <- getWorld
+                   setWorld $ world { player = move (player world) dir }
+    Attack monster -> do world <- getWorld
+                         (nextPlayer, nextMonster) <- fight (player world) monster
                          let nextMonsters = nextMonster:(filter (not . samePosition monster) (monsters world))
-                         return $ world { player = nextPlayer, monsters = nextMonsters }
+                         setWorld $ world { player = nextPlayer, monsters = nextMonsters }
+
+monsterTurn :: Roguelike ()
+monsterTurn = do world <- getWorld
+                 let nextMonsters = filter alive $ monsters world
+                 setWorld $ world { monsters = nextMonsters }
+
+evasionRoll :: Entity a => a -> Roguelike Integer
+evasionRoll = roll evasion (-4, 1)
+
+attackRoll :: Entity a => a -> Roguelike Integer
+attackRoll = roll attack (-1, 2)
+
+accuracyRoll :: Entity a => a -> Roguelike Integer
+accuracyRoll = roll accuracy (-1, 6)
+
+defenseRoll :: Entity a => a -> Roguelike Integer
+defenseRoll = roll defense (-2, 1)
 
 fight :: (Entity a, Entity b) => a -> b -> Roguelike (a, b)
 fight attacker defender =
-    do attackerAccuracy <- lift $ accuracyRoll attacker
-       attackerAttack   <- lift $ attackRoll   attacker
-       defenderEvasion  <- lift $ evasionRoll  defender
-       defenderDefense  <- lift $ defenseRoll  defender
+    do attackerAccuracy <- accuracyRoll attacker
+       attackerAttack   <- attackRoll   attacker
+       defenderEvasion  <- evasionRoll  defender
+       defenderDefense  <- defenseRoll  defender
        let damage = if attackerAttack > defenderDefense
                     then attackerAttack - defenderDefense
                     else 0
        if defenderEvasion > attackerAccuracy
-           then do logMessage "Defender evaded!"
+           then do logMessage $ getName defender ++ " evaded!"
                    return (attacker, defender)
-           else do logMessage $ "Attack hit defender for " ++ (show damage) ++ " damage!"
+           else do logMessage $ getName attacker ++ " hit " ++ getName defender ++ " for " ++ (show damage) ++ " damage!"
                    return (attacker, hurt defender damage)

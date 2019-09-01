@@ -21,6 +21,7 @@ instance Drawable Player where
     getTiles (Player pos _) = Tiles . fromList $ [(pos, Colored '@' (Yellow, Black))]
 
 instance Entity Player where
+    getName _ = "You"
     getPosition = position
     move player dir = player { position = newPos }
          where pos = position player

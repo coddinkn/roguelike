@@ -15,6 +15,7 @@ data Monster = Generic { monsterPosition :: Position
 instance Entity Monster where
     getPosition = monsterPosition
     getStats = monsterStats
+    getName _ = "Monster"
     move (Generic pos stats) dir = Generic newPos stats
                                    where newPos = changePosition pos dir
     updateStats monster stats = monster { monsterStats = stats }

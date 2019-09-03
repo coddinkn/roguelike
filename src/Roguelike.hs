@@ -2,6 +2,9 @@ module Roguelike where
 
 import World
 import Entity
+import Level
+import Monster
+import Player
 
 import Control.Monad.Writer
 import Control.Monad.State
@@ -18,6 +21,18 @@ roll stat range entity = lift . lift $ do rollValue <- getRandomR range
 
 logMessage :: String -> Roguelike ()
 logMessage = tell . pure
+
+modifyWorld :: (World -> World) -> Roguelike ()
+modifyWorld = lift . modify
+
+getMonsters :: Roguelike [Monster]
+getMonsters = lift $ gets monsters
+
+getLevel :: Roguelike Level
+getLevel = lift $ gets level
+
+getPlayer :: Roguelike Player
+getPlayer = lift $ gets player
 
 getWorld :: Roguelike World
 getWorld = lift get

@@ -9,9 +9,8 @@ import Position
 import Entity
 import Log
 
-import Control.Monad.Trans
-
 import Data.Maybe
+import Data.Char
 
 data Action = Move Direction
             | Attack Monster
@@ -30,17 +29,16 @@ updateWorld action = do playerTurn action
 
 playerTurn :: Action -> Roguelike ()
 playerTurn action = case action of
-    Move dir -> do world <- getWorld
-                   setWorld $ world { player = move (player world) dir }
-    Attack monster -> do world <- getWorld
-                         (nextPlayer, nextMonster) <- fight (player world) monster
-                         let nextMonsters = nextMonster:(filter (not . samePosition monster) (monsters world))
-                         setWorld $ world { player = nextPlayer, monsters = nextMonsters }
+    Move dir -> modifyWorld $ \world -> world { player = move (player world) dir }
+    Attack monster -> do player <- getPlayer
+                         monsters <- getMonsters
+                         (nextPlayer, nextMonster) <- fight player monster
+                         let nextMonsters = nextMonster:(filter (not . samePosition monster) monsters)
+                         modifyWorld $ \world -> world { player = nextPlayer, monsters = nextMonsters }
 
 monsterTurn :: Roguelike ()
-monsterTurn = do world <- getWorld
-                 let nextMonsters = filter alive $ monsters world
-                 setWorld $ world { monsters = nextMonsters }
+monsterTurn = modifyWorld $ \world -> let nextMonsters = filter alive $ monsters world
+                                      in world { monsters = nextMonsters }
 
 evasionRoll :: Entity a => a -> Roguelike Integer
 evasionRoll = roll evasion (-4, 1)
@@ -66,5 +64,5 @@ fight attacker defender =
        if defenderEvasion > attackerAccuracy
            then do logMessage $ getName defender ++ " evaded!"
                    return (attacker, defender)
-           else do logMessage $ getName attacker ++ " hit " ++ getName defender ++ " for " ++ (show damage) ++ " damage!"
+           else do logMessage $ getName attacker ++ " hit " ++ (map toLower . getName $ defender) ++ " for " ++ (show damage) ++ " damage!"
                    return (attacker, hurt defender damage)

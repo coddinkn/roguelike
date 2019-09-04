@@ -22,7 +22,7 @@ scroll :: Log -> Int -> Log
 scroll log numLines = log { currentLine = nextLine, firstNewLine = nextNewLine }
              where getNext line 
                          | line == 0 = Nothing 
-                         | line >  0 = Just $ line - (toInteger numLines) 
+                         | line >  0 = Just $ line - toInteger numLines
                    nextLine = currentLine log >>= getNext
                    getNextNew line
                          | line == 0 = Nothing
@@ -61,9 +61,9 @@ more = "... (more)"
 addMoreIndicator :: Int -> [String] -> [String]
 addMoreIndicator width chunks =
     if length lastChunk <= length more
-    then (addMore $ take (numChunks - 2) chunks)
+    then addMore (take (numChunks - 2) chunks)
       ++ [concat  $ drop (numChunks - 2) chunks]
-    else (addMore $ init chunks) ++ [lastChunk] 
+    else addMore (init chunks) ++ [lastChunk]
     where numChunks = length chunks
           lastChunk = last chunks
           addMore = map (++ more)

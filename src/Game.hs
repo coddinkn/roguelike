@@ -38,8 +38,7 @@ create world = do (window, colors) <- runCurses initCurses
 loop :: Game -> Curses ()
 loop (Game world window colors log) =
     do newLog <- updateWindow window $ do draw colors world
-                                          newLog <- drawLog colors log (0, 15)
-                                          return newLog
+                                          drawLog colors log (0, 15)
        render
        input <- getInput window
        case input of

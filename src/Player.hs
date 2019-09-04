@@ -23,8 +23,8 @@ instance Drawable Player where
 instance Entity Player where
     getName _ = "You"
     getPosition = position
-    move player dir = player { position = newPos }
+    move player change = player { position = newPos }
          where pos = position player
-               newPos = changePosition pos dir
+               newPos = pos + change
     getStats = stats
     updateStats player s = player { stats = s }

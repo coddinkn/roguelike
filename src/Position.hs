@@ -34,3 +34,15 @@ dirToUnitPosition dir = uncurry Grid $ case dir of
 changePosition :: Position -> Direction -> Position
 changePosition pos dir = pos + change
     where change = dirToUnitPosition dir
+
+distanceToUnitPos :: Position -> Position
+distanceToUnitPos (Grid x y)
+    | x >  0 && y >  0 = Grid (-1) (-1)
+    | x >  0 && y == 0 = Grid (-1) 0
+    | x >  0 && y <  0 = Grid (-1) 1
+    | x == 0 && y >  0 = Grid 0 (-1)
+    | x == 0 && y == 0 = Grid 0 0
+    | x == 0 && y <  0 = Grid 0 1
+    | x <  0 && y >  0 = Grid 1 (-1)
+    | x <  0 && y == 0 = Grid 1 0
+    | x <  0 && y <  0 = Grid 1 1

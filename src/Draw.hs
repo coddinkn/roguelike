@@ -14,7 +14,7 @@ class Drawable a where
 fillScreen :: Colors -> (Color, Color) -> Update ()
 fillScreen colors color =
     do (maxY, maxX) <- windowSize
-       mapM_ (fillSpace maxX) $ [0 .. (maxY - 1)]
+       mapM_ (fillSpace maxX) [0 .. (maxY - 1)]
        where fillColor = findColor colors color
              fillGlyph = Glyph ' ' [AttributeColor fillColor]
              fillSpace maxX y = do moveCursor y 0

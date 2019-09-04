@@ -7,7 +7,7 @@ class Drawable a => Entity a where
     getName :: a -> String
     getPosition :: a -> Position
     getStats :: a -> Stats
-    move :: a -> Direction -> a
+    move :: a -> Position -> a
     updateStats :: a -> Stats -> a
 
 data Stats = Stats { currentHealth :: Integer
@@ -32,3 +32,16 @@ samePosition :: (Entity a, Entity b) => a -> b -> Bool
 samePosition a b = aPosition == bPosition
     where aPosition = getPosition a
           bPosition = getPosition b
+
+distanceBetween :: (Entity a, Entity b) => a -> b -> Position
+distanceBetween a b = aPosition - bPosition
+    where aPosition = getPosition a
+          bPosition = getPosition b
+
+attackingDistance :: (Entity a, Entity b) => a -> b -> Bool
+attackingDistance a b = abs distance < 1
+    where distance = distanceBetween a b
+
+moveTowards :: (Entity a, Entity b) => a -> b -> a
+moveTowards a b = move a change
+    where change = distanceToUnitPos $ distanceBetween a b

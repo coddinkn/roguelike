@@ -35,6 +35,6 @@ charToInput char = case char of
     'j' -> Just $ Try South
     'k' -> Just $ Try North
     'l' -> Just $ Try East
-    ' ' -> Just $ ScrollLog
+    ' ' -> Just ScrollLog
     'q' -> Just Quit 
     _   -> Nothing

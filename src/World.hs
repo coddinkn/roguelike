@@ -26,10 +26,11 @@ loadWorld contents = World player level monsters
           level       = makeLevel l
 
 checkPlayerLevelCollision :: World -> Direction -> Bool
-checkPlayerLevelCollision (World player level _) = checkCollision level player
+checkPlayerLevelCollision (World player level _) = checkCollision level player . dirToUnitPosition
 
 checkPlayerMonsterCollision :: World -> Direction -> Maybe Monster
-checkPlayerMonsterCollision (World player _ monsters) dir = find (samePosition $ move player dir) monsters
+checkPlayerMonsterCollision (World player _ monsters) dir = find (samePosition $ move player dpos) monsters
+    where dpos = dirToUnitPosition dir
 
 instance Drawable World where
     getTiles (World player level monsters) =

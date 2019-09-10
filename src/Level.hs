@@ -25,10 +25,10 @@ instance Drawable Level where
 getTile :: Level -> Position -> Maybe Char
 getTile (Level (Tiles tiles)) pos = head . show <$> lookup pos tiles
 
-checkCollision :: Entity a => Level -> a -> Position -> Bool
-checkCollision level entity dpos =
+checkLevelCollision :: Entity a => Level -> a -> Direction -> Bool
+checkLevelCollision level entity dir =
     case maybeTile of
          Just tile -> tile /= '.'
          Nothing   -> False
     where pos = getPosition entity
-          maybeTile = getTile level $ pos + dpos
+          maybeTile = getTile level $ pos + dirToUnitPosition dir

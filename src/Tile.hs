@@ -8,6 +8,7 @@ import Data.Map
 data Tile = Empty
           | Default Char
           | Colored Char (Color, Color)
+          deriving Eq
 
 instance Show Tile where
     show tile = case tile of
@@ -16,8 +17,7 @@ instance Show Tile where
         Colored c _ -> [c] 
 
 emptyTile :: Tile -> Bool
-emptyTile Empty = True
-emptyTile _     = False 
+emptyTile = (==) Empty
 
 newtype Tiles = Tiles (Map Position Tile)
 

@@ -23,8 +23,11 @@ instance Drawable Player where
 instance Entity Player where
     getName _ = "You"
     getPosition = position
-    move player change = player { position = newPos }
+    move player dir = player { position = newPos }
          where pos = position player
-               newPos = pos + change
+               newPos = pos + dirToUnitPosition dir
     getStats = stats
     updateStats player s = player { stats = s }
+
+checkPlayerCollision :: Entity a => Player -> a -> Direction -> Bool
+checkPlayerCollision player entity dir = samePosition player $ move entity dir

@@ -4,6 +4,7 @@ import Roguelike
 import Input
 import Player
 import Monster
+import Level
 import World
 import Position
 import Entity
@@ -17,10 +18,10 @@ data Action = Move Direction
 
 evaluateInput :: World -> Input -> Maybe Action
 evaluateInput world input = case input of
-    Try dir | checkPlayerLevelCollision world dir -> Nothing
-            | isJust target -> Attack <$> target
-            | otherwise     -> Just $ Move dir
-            where target = checkPlayerMonsterCollision world dir
+    Try dir -> case checkCollision world (player world) dir of
+                    NoCollision -> Just $ Move dir
+                    MonsterCollision monster -> Just $ Attack monster
+                    _ -> Nothing
     _ -> Nothing
 
 updateWorld :: Action -> Roguelike ()
@@ -29,12 +30,32 @@ updateWorld action = do playerTurn action
 
 playerTurn :: Action -> Roguelike ()
 playerTurn action = case action of
-    Move dir -> modifyWorld $ \world -> world { player = move (player world) (dirToUnitPosition dir) }
+    Move dir -> modifyWorld $ \world -> world { player = move (player world) dir }
     Attack monster -> do player <- getPlayer
                          monsters <- getMonsters
                          (nextPlayer, nextMonster) <- fight player monster
                          let nextMonsters = nextMonster : filter (not . samePosition monster) monsters
                          modifyWorld $ \world -> world { player = nextPlayer, monsters = nextMonsters }
+
+attackPlayer :: Monster -> Roguelike ()
+attackPlayer monster = do player <- getPlayer
+                          monsters <- getMonsters
+                          (nextMonster, nextPlayer) <- fight monster player
+                          let nextMonsters = nextMonster : filter (not . samePosition monster) monsters
+                          modifyWorld $ \world -> world { player = nextPlayer, monsters = nextMonsters }
+
+moveTowardsPlayer :: Monster -> Roguelike ()
+moveTowardsPlayer monster = do player <- getPlayer
+                               level <- getLevel
+                               monsters <- getMonsters
+                               let dir = monster `dirTowards` player
+                               if maybe True (checkLevelCollision level monster) dir
+                                  then return ()
+                                  else let nextMonster = maybe monster
+                                                               (move monster)
+                                                               dir
+                                           nextMonsters = nextMonster : filter (not . samePosition monster) monsters
+                                       in modifyWorld $ \world -> world { monsters = nextMonsters }
 
 monstersTurn :: Roguelike ()
 monstersTurn = do monsters <- getMonsters
@@ -42,14 +63,9 @@ monstersTurn = do monsters <- getMonsters
 
 monsterTurn :: Monster -> Roguelike ()
 monsterTurn monster = do player <- getPlayer
-                         monsters <- getMonsters
                          if attackingDistance monster player
-                            then do (nextMonster, nextPlayer) <- fight monster player
-                                    let nextMonsters = nextMonster : filter (not . samePosition monster) monsters
-                                    modifyWorld $ \world -> world { player = nextPlayer, monsters = nextMonsters }
-                            else let nextMonster = monster `moveTowards` player
-                                     nextMonsters = nextMonster : filter (not . samePosition monster) monsters
-                                 in modifyWorld $ \world -> world { monsters = nextMonsters }
+                            then attackPlayer monster
+                            else moveTowardsPlayer monster
 
 evasionRoll :: Entity a => a -> Roguelike Integer
 evasionRoll = roll evasion (-4, 1)

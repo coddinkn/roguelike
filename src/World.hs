@@ -16,6 +16,12 @@ data World = World { player :: Player
                    , monsters :: [Monster]
                    } deriving Show
 
+data Collision = PlayerCollision Player
+               | MonsterCollision Monster
+               | LevelCollision
+               | NoCollision
+               deriving Show
+
 loadWorld :: String -> World
 loadWorld contents = World player level monsters
     where x:y:xs:ys:l = lines contents
@@ -25,12 +31,13 @@ loadWorld contents = World player level monsters
           monsters    = makeMonsters xs ys
           level       = makeLevel l
 
-checkPlayerLevelCollision :: World -> Direction -> Bool
-checkPlayerLevelCollision (World player level _) = checkCollision level player . dirToUnitPosition
-
-checkPlayerMonsterCollision :: World -> Direction -> Maybe Monster
-checkPlayerMonsterCollision (World player _ monsters) dir = find (samePosition $ move player dpos) monsters
-    where dpos = dirToUnitPosition dir
+checkCollision :: Entity a => World -> a -> Direction -> Collision
+checkCollision (World player level monsters) entity dir
+    | checkLevelCollision level entity dir = LevelCollision
+    | checkPlayerCollision player entity dir = PlayerCollision player
+    | otherwise = maybe NoCollision
+                        MonsterCollision
+                        (checkMonsterCollision monsters entity dir)
 
 instance Drawable World where
     getTiles (World player level monsters) =

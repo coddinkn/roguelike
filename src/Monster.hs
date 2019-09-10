@@ -7,6 +7,7 @@ import Position
 import Entity
 
 import Data.Map hiding (map)
+import Data.List
 
 data Monster = Generic { monsterPosition :: Position
                        , monsterStats    :: Stats
@@ -16,8 +17,8 @@ instance Entity Monster where
     getPosition = monsterPosition
     getStats = monsterStats
     getName _ = "Monster"
-    move (Generic pos stats) change = Generic newPos stats
-                                   where newPos = pos + change
+    move (Generic pos stats) dir = Generic newPos stats
+        where newPos = pos + dirToUnitPosition dir
     updateStats monster stats = monster { monsterStats = stats }
 
 instance Show Monster where
@@ -38,3 +39,6 @@ makeMonsters :: String -> String -> [Monster]
 makeMonsters xString yString = makeMonster <$> zip xs ys
     where xs = read <$> words xString
           ys = read <$> words yString
+
+checkMonsterCollision :: Entity a => [Monster] -> a -> Direction -> Maybe Monster
+checkMonsterCollision monsters entity dir = find (samePosition $ move entity dir) monsters

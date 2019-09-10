@@ -4,6 +4,11 @@ data Direction = East
                | West 
                | North 
                | South
+               | NorthEast
+               | NorthWest
+               | SouthEast
+               | SouthWest
+               deriving (Show, Eq)
 
 data Position = Grid { getX :: Integer
                      , getY :: Integer
@@ -26,23 +31,27 @@ getAsPair pos = case pos of
 
 dirToUnitPosition :: Direction -> Position
 dirToUnitPosition dir = uncurry Grid $ case dir of
-    West  -> (-1, 0)
-    East  -> (1,  0)
-    North -> (0, -1)
-    South -> (0,  1)
+    West  -> (-1,  0)
+    East  -> ( 1,  0)
+    North -> ( 0, -1)
+    South -> ( 0,  1)
+    NorthWest -> (-1, -1)
+    NorthEast -> ( 1, -1)
+    SouthWest -> (-1,  1)
+    SouthEast -> ( 1,  1)
 
 changePosition :: Position -> Direction -> Position
 changePosition pos dir = pos + change
     where change = dirToUnitPosition dir
 
-distanceToUnitPos :: Position -> Position
-distanceToUnitPos (Grid x y)
-    | x >  0 && y >  0 = Grid (-1) (-1)
-    | x >  0 && y == 0 = Grid (-1) 0
-    | x >  0 && y <  0 = Grid (-1) 1
-    | x == 0 && y >  0 = Grid 0 (-1)
-    | x == 0 && y == 0 = Grid 0 0
-    | x == 0 && y <  0 = Grid 0 1
-    | x <  0 && y >  0 = Grid 1 (-1)
-    | x <  0 && y == 0 = Grid 1 0
-    | x <  0 && y <  0 = Grid 1 1
+distanceToDir :: Position -> Maybe Direction
+distanceToDir (Grid x y)
+    | x >  0 && y >  0 = Just NorthWest
+    | x >  0 && y == 0 = Just West
+    | x >  0 && y <  0 = Just SouthWest
+    | x == 0 && y >  0 = Just North
+    | x == 0 && y == 0 = Nothing
+    | x == 0 && y <  0 = Just South
+    | x <  0 && y >  0 = Just NorthEast
+    | x <  0 && y == 0 = Just East
+    | x <  0 && y <  0 = Just SouthEast

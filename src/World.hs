@@ -22,6 +22,9 @@ data Collision = PlayerCollision Player
                | NoCollision
                deriving Show
 
+endOfTheWorld :: World -> Bool
+endOfTheWorld = not . alive . player
+
 loadWorld :: String -> World
 loadWorld contents = World player level monsters
     where x:y:xs:ys:l = lines contents
@@ -38,6 +41,13 @@ checkCollision (World player level monsters) entity dir
     | otherwise = maybe NoCollision
                         MonsterCollision
                         (checkMonsterCollision monsters entity dir)
+
+updateMonster :: World -> Monster -> (Monster -> Monster) -> World
+updateMonster world monster changeMonster =
+    let nextMonster = changeMonster monster
+        nextMonsters = nextMonster : filter (not . samePosition monster) ms
+    in world { monsters = nextMonsters }
+    where ms = monsters world
 
 instance Drawable World where
     getTiles (World player level monsters) =

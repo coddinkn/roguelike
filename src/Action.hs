@@ -27,6 +27,7 @@ evaluateInput world input = case input of
 updateWorld :: Action -> Roguelike ()
 updateWorld action = do playerTurn action
                         monstersTurn
+                        godsTurn
 
 playerTurn :: Action -> Roguelike ()
 playerTurn action = case action of
@@ -44,28 +45,26 @@ attackPlayer monster = do player <- getPlayer
                           let nextMonsters = nextMonster : filter (not . samePosition monster) monsters
                           modifyWorld $ \world -> world { player = nextPlayer, monsters = nextMonsters }
 
-moveTowardsPlayer :: Monster -> Roguelike ()
-moveTowardsPlayer monster = do player <- getPlayer
-                               level <- getLevel
-                               monsters <- getMonsters
-                               let dir = monster `dirTowards` player
-                               if maybe True (checkLevelCollision level monster) dir
-                                  then return ()
-                                  else let nextMonster = maybe monster
-                                                               (move monster)
-                                                               dir
-                                           nextMonsters = nextMonster : filter (not . samePosition monster) monsters
-                                       in modifyWorld $ \world -> world { monsters = nextMonsters }
+monsterTurn :: Monster -> Roguelike ()
+monsterTurn monster = do player <- getPlayer
+                         world <- getWorld
+                         monsters <- getMonsters
+                         let maybeDir = monster `dirTowards` player
+                         case maybeDir of
+                            Just dir -> case checkCollision world monster dir of
+                                             PlayerCollision player -> attackPlayer monster
+                                             NoCollision -> modifyWorld $ \world -> updateMonster world monster $ flip move dir
+                                             _ -> return ()
+                            Nothing -> return ()
+
+godsTurn :: Roguelike ()
+godsTurn = do monsters <- getMonsters
+              let newMonsters = filter alive monsters
+              modifyWorld $ \world -> world { monsters = newMonsters }
 
 monstersTurn :: Roguelike ()
 monstersTurn = do monsters <- getMonsters
                   mapM_ monsterTurn monsters
-
-monsterTurn :: Monster -> Roguelike ()
-monsterTurn monster = do player <- getPlayer
-                         if attackingDistance monster player
-                            then attackPlayer monster
-                            else moveTowardsPlayer monster
 
 evasionRoll :: Entity a => a -> Roguelike Integer
 evasionRoll = roll evasion (-4, 1)

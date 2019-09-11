@@ -12,6 +12,7 @@ import Log
 
 import Data.Maybe
 import Data.Char
+import Control.Monad
 
 data Action = Move Direction
             | Attack Monster
@@ -27,7 +28,6 @@ evaluateInput world input = case input of
 updateWorld :: Action -> Roguelike ()
 updateWorld action = do playerTurn action
                         monstersTurn
-                        godsTurn
 
 playerTurn :: Action -> Roguelike ()
 playerTurn action = case action of
@@ -35,7 +35,7 @@ playerTurn action = case action of
     Attack monster -> do player <- getPlayer
                          monsters <- getMonsters
                          (nextPlayer, nextMonster) <- fight player monster
-                         let nextMonsters = nextMonster : filter (not . samePosition monster) monsters
+                         let nextMonsters = filter alive $ nextMonster : filter (not . samePosition monster) monsters
                          modifyWorld $ \world -> world { player = nextPlayer, monsters = nextMonsters }
 
 attackPlayer :: Monster -> Roguelike ()
@@ -56,11 +56,6 @@ monsterTurn monster = do player <- getPlayer
                                              NoCollision -> modifyWorld $ \world -> updateMonster world monster $ flip move dir
                                              _ -> return ()
                             Nothing -> return ()
-
-godsTurn :: Roguelike ()
-godsTurn = do monsters <- getMonsters
-              let newMonsters = filter alive monsters
-              modifyWorld $ \world -> world { monsters = newMonsters }
 
 monstersTurn :: Roguelike ()
 monstersTurn = do monsters <- getMonsters
@@ -88,7 +83,9 @@ fight attacker defender =
                     then attackerAttack - defenderDefense
                     else 0
        if defenderEvasion > attackerAccuracy
-           then do logMessage $ getName defender ++ " evaded!"
+           then do logMessage $ getName attacker ++ " missed."
                    return (attacker, defender)
-           else do logMessage $ getName attacker ++ " hit " ++ (map toLower . getName $ defender) ++ " for " ++ show damage ++ " damage!"
-                   return (attacker, hurt defender damage)
+           else do logMessage $ getName attacker ++ " hit " ++ (map toLower . getName $ defender) ++ " for " ++ show damage ++ " damage."
+                   let newDefender = hurt defender damage
+                   unless (alive newDefender) (logMessage $ getName attacker ++ " killed " ++ (map toLower . getName $ defender) ++ ".")
+                   return (attacker, newDefender)

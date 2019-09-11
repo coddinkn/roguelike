@@ -59,13 +59,14 @@ more :: String
 more = "... (more)"
 
 addMoreIndicator :: Int -> [String] -> [String]
-addMoreIndicator width chunks =
-    if length lastChunk <= length more
-    then addMore (take (numChunks - 2) chunks)
-      ++ [concat  $ drop (numChunks - 2) chunks]
-    else addMore (init chunks) ++ [lastChunk]
+addMoreIndicator width chunks = if not $ null chunks
+    then let lastChunk = last chunks
+         in if length lastChunk <= length more
+            then addMore (take (numChunks - 2) chunks)
+                 ++ [concat  $ drop (numChunks - 2) chunks]
+            else addMore (init chunks) ++ [lastChunk]
+    else []
     where numChunks = length chunks
-          lastChunk = last chunks
           addMore = map (++ more)
 
 fitToWidth :: Int -> String -> [String]

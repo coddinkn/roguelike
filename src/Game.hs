@@ -44,12 +44,12 @@ loop (Game world window colors log) =
        case input of
             Quit -> closeWindow window
             ScrollLog -> loop $ Game world window colors $ scroll newLog 1
-            _    -> do (nextWorld, messages) <- maybe (return (world, []))
+            _    -> do (nextWorld, message) <- maybe (return (world, ""))
                                                 (runRoguelike world . updateWorld)
                                                 maybeAction
                        if endOfTheWorld nextWorld
                           then closeWindow window
-                          else loop $ Game nextWorld window colors . top $ addMessages newLog messages
+                          else loop $ Game nextWorld window colors . top $ addMessage newLog message
                        where maybeAction = evaluateInput world input
 
 play :: Game -> IO ()

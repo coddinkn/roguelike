@@ -9,6 +9,7 @@ import Player
 import Control.Monad.Writer
 import Control.Monad.State
 import Control.Monad.Random
+import Data.List
 import System.Random
 import UI.NCurses
 
@@ -40,7 +41,7 @@ getWorld = lift get
 setWorld :: World -> Roguelike ()
 setWorld = lift . put
 
-runRoguelike :: World -> Roguelike () -> Curses (World, [String])
+runRoguelike :: World -> Roguelike () -> Curses (World, String)
 runRoguelike world roguelike =
     do ((_, newLogLines), newWorld) <- liftIO . evalRandIO . flip runStateT world . runWriterT $ roguelike
-       return (newWorld, newLogLines)
+       return (newWorld, unwords newLogLines)

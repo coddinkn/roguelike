@@ -27,12 +27,12 @@ endOfTheWorld = not . alive . player
 
 loadWorld :: String -> World
 loadWorld contents = World player level monsters
-    where x:y:xs:ys:l = lines contents
-          playerPos   = Grid (read x :: Integer) (read y :: Integer)
-          playerStats = Stats 20 20 12 12 12 12
-          player      = Player playerPos playerStats
-          monsters    = makeMonsters xs ys
-          level       = makeLevel l
+    where x:y:xs:ys:cs:l = lines contents
+          playerPos      = Grid (read x :: Integer) (read y :: Integer)
+          playerStats    = Stats 20 20 12 12 12 12
+          player         = Player playerPos playerStats
+          monsters       = makeMonsters xs ys cs
+          level          = makeLevel l
 
 checkCollision :: Entity a => World -> a -> Direction -> Collision
 checkCollision (World player level monsters) entity dir

@@ -83,9 +83,9 @@ fight attacker defender =
                     then attackerAttack - defenderDefense
                     else 0
        if defenderEvasion > attackerAccuracy
-           then do logMessage $ getName attacker ++ " missed."
+           then do logMessage $ getName attacker ++ " misses " ++ (map toLower . getName $ defender) ++ "."
                    return (attacker, defender)
-           else do logMessage $ getName attacker ++ " hit " ++ (map toLower . getName $ defender) ++ " for " ++ show damage ++ " damage."
+           else do logMessage $ getName attacker ++ " hits " ++ (map toLower . getName $ defender) ++ " for " ++ show damage ++ " damage."
                    let newDefender = hurt defender damage
                    unless (alive newDefender) (logMessage $ getName attacker ++ " killed " ++ (map toLower . getName $ defender) ++ ".")
                    return (attacker, newDefender)

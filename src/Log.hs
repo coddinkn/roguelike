@@ -2,6 +2,8 @@ module Log where
 
 import Color
 import Roguelike
+import World
+import Entity
 
 import Prelude hiding (lines)
 import Data.List hiding (lines)
@@ -84,3 +86,10 @@ drawLog colors log (x, y) = do moveCursor y x
                                                   setColor defaultColorID
                                                   return $ clearFirstNewLine log)
                                      (currentLine log)
+
+drawStatus :: Colors -> World -> (Integer, Integer) -> Update ()
+drawStatus colors world (x, y) = do moveCursor y x
+                                    setColor $ findColor colors (White, Black)
+                                    drawString $ "HP: " ++ show hp ++ "/" ++ show max
+                                    where hp = currentHealth . getStats . player $ world
+                                          max = maxHealth . getStats . player $ world

@@ -32,12 +32,13 @@ initCurses = do setEcho False
 
 create :: World -> IO Game
 create world = do (window, colors) <- runCurses initCurses
-                  let log = addMessage (emptyLog 80) "Welcome to roguelike!"
+                  let log = emptyLog 80
                   return $ Game world window colors log
 
 loop :: Game -> Curses ()
 loop (Game world window colors log) =
     do newLog <- updateWindow window $ do draw colors world
+                                          drawStatus colors world (0, 16)
                                           drawLog colors log (0, 15)
        render
        input <- getInput window
